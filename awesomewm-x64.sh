@@ -1,5 +1,5 @@
 #!/bin/bash
-DESKTOP="dwm"
+DESKTOP="awesomewm"
 echo "========================="
 echo "|      ${DESKTOP} VOID x86_64     |"
 echo " ------------------------"
