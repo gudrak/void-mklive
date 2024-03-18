@@ -70,7 +70,7 @@ build_variant() {
             LXDM_SESSION=LXDE
         ;;
         awesomewm)
-            PKGS="$PKGS $XORG_PKGS awesomewm lxdm gvfs-afc gvfs-mtp gvfs-smb udisks2 firefox"
+            PKGS="$PKGS $XORG_PKGS awesomewm xterm lxdm gvfs-afc gvfs-mtp gvfs-smb udisks2 firefox"
             SERVICES="$SERVICES acpid dbus dhcpcd wpa_supplicant lxdm polkitd"
             LXDM_SESSION=awesomewm
         ;;
