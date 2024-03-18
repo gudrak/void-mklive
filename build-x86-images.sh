@@ -6,13 +6,13 @@ set -eu
 
 PROGNAME=$(basename "$0")
 ARCH=$(uname -m)
-IMAGES="base enlightenment xfce mate cinnamon gnome kde lxde lxqt"
+IMAGES="base lxde awesome"
 TRIPLET=
 REPO=
 DATE=$(date -u +%Y%m%d)
 
 help() {
-    echo "$PROGNAME: [-a arch] [-b base|enlightenment|xfce|mate|cinnamon|gnome|kde|lxde|lxqt] [-d date] [-t arch-date-variant] [-r repo]" >&2
+    echo "$PROGNAME: [-a arch] [-b base|lxde|awesomewm] [-d date] [-t arch-date-variant] [-r repo]" >&2
 }
 
 while getopts "a:b:d:t:hr:V" opt; do
@@ -53,67 +53,32 @@ build_variant() {
     shift
     IMG=void-live-${ARCH}-${DATE}-${variant}.iso
     GRUB_PKGS="grub-i386-efi grub-x86_64-efi"
-    A11Y_PKGS="espeakup void-live-audio brltty"
+    A11Y_PKGS="void-live-audio"
     PKGS="dialog cryptsetup lvm2 mdadm void-docs-browse xtools-minimal xmirror $A11Y_PKGS $GRUB_PKGS"
     XORG_PKGS="xorg-minimal xorg-input-drivers xorg-video-drivers setxkbmap xauth font-misc-misc terminus-font dejavu-fonts-ttf orca"
     SERVICES="sshd"
 
-    LIGHTDM_SESSION=''
+    LXDM_SESSION=''
 
     case $variant in
         base)
             SERVICES="$SERVICES dhcpcd wpa_supplicant acpid"
         ;;
-        enlightenment)
-            PKGS="$PKGS $XORG_PKGS lightdm lightdm-gtk3-greeter enlightenment terminology udisks2 firefox"
-            SERVICES="$SERVICES acpid dhcpcd wpa_supplicant lightdm dbus polkitd"
-            LIGHTDM_SESSION=enlightenment
-        ;;
-        xfce)
-            PKGS="$PKGS $XORG_PKGS lightdm lightdm-gtk3-greeter xfce4 gnome-themes-standard gnome-keyring network-manager-applet gvfs-afc gvfs-mtp gvfs-smb udisks2 firefox xfce4-pulseaudio-plugin"
-            SERVICES="$SERVICES dbus elogind lightdm NetworkManager polkitd"
-            LIGHTDM_SESSION=xfce
-        ;;
-        mate)
-            PKGS="$PKGS $XORG_PKGS lightdm lightdm-gtk3-greeter mate mate-extra gnome-keyring network-manager-applet gvfs-afc gvfs-mtp gvfs-smb udisks2 firefox"
-            SERVICES="$SERVICES dbus elogind lightdm NetworkManager polkitd"
-            LIGHTDM_SESSION=mate
-        ;;
-        cinnamon)
-            PKGS="$PKGS $XORG_PKGS lightdm lightdm-gtk3-greeter cinnamon gnome-keyring colord gnome-terminal gvfs-afc gvfs-mtp gvfs-smb udisks2 firefox"
-            SERVICES="$SERVICES dbus elogind lightdm NetworkManager polkitd"
-            LIGHTDM_SESSION=cinnamon
-        ;;
-        gnome)
-            PKGS="$PKGS $XORG_PKGS gnome firefox"
-            SERVICES="$SERVICES dbus elogind gdm NetworkManager polkitd"
-        ;;
-        kde)
-            PKGS="$PKGS $XORG_PKGS kde5 konsole firefox dolphin"
-            SERVICES="$SERVICES dbus elogind NetworkManager sddm"
-        ;;
         lxde)
-            PKGS="$PKGS $XORG_PKGS lxde lightdm lightdm-gtk3-greeter gvfs-afc gvfs-mtp gvfs-smb udisks2 firefox"
-            SERVICES="$SERVICES acpid dbus dhcpcd wpa_supplicant lightdm polkitd"
-            LIGHTDM_SESSION=LXDE
+            PKGS="$PKGS $XORG_PKGS lxde lxdm gvfs-afc gvfs-mtp gvfs-smb udisks2 firefox"
+            SERVICES="$SERVICES acpid dbus dhcpcd wpa_supplicant lxdm polkitd"
+            LXDM_SESSION=LXDE
         ;;
-        lxqt)
-            PKGS="$PKGS $XORG_PKGS lxqt sddm gvfs-afc gvfs-mtp gvfs-smb udisks2 firefox"
-            SERVICES="$SERVICES elogind dbus dhcpcd wpa_supplicant sddm polkitd"
+        awesomewm)
+            PKGS="$PKGS $XORG_PKGS awesomewm lxdm gvfs-afc gvfs-mtp gvfs-smb udisks2 firefox"
+            SERVICES="$SERVICES acpid dbus dhcpcd wpa_supplicant lxdm polkitd"
+            LXDM_SESSION=awesomewm
         ;;
         *)
             >&2 echo "Unknown variant $variant"
             exit 1
         ;;
     esac
-
-    if [ -n "$LIGHTDM_SESSION" ]; then
-        mkdir -p "$INCLUDEDIR"/etc/lightdm
-        echo "$LIGHTDM_SESSION" > "$INCLUDEDIR"/etc/lightdm/.session
-        # needed to show the keyboard layout menu on the login screen
-        cat <<- EOF > "$INCLUDEDIR"/etc/lightdm/lightdm-gtk-greeter.conf
-[greeter]
-indicators = ~host;~spacer;~clock;~spacer;~layout;~session;~a11y;~power
 EOF
     fi
 
