@@ -31,17 +31,10 @@ mvImages(){
     fi
 
     rm -r ${PKGLISTDIR}/*
-    cp gnome-x64.packages ${PKGLISTDIR}/gnome-x64.packages.txt
     cp base-x64.packages ${PKGLISTDIR}/base-x64.packages.txt
-    cp cinnamon-x64.packages ${PKGLISTDIR}/cinnamon-x64.packages.txt
-    cp e17-x64.packages ${PKGLISTDIR}/e17-x64.packages.txt
-    cp mate-x64.packages ${PKGLISTDIR}/mate-x64.packages.txt
-#    cp lxde-x64.packages ${PKGLISTDIR}/lxde-x64.packages.txt
-    cp lxqt-x64.packages ${PKGLISTDIR}/lxqt-x64.packages.txt
-    cp i3-x64.packages ${PKGLISTDIR}/i3-x64.packages.txt
-    cp kde-x64.packages ${PKGLISTDIR}/kde-x64.packages.txt
-    #cp gnome-x64.packages ${PKGLISTDIR}/gnome-x64.packages.txt
-    cp xfce-x64.packages ${PKGLISTDIR}/xfce-x64.packages.txt
+    cp lxde-x64.packages ${PKGLISTDIR}/lxde-x64.packages.txt
+    cp awesomewm-x64.packages ${PKGLISTDIR}/awesomewm-x64.packages.txt
+
 
     cp -r ${PKGLISTDIR} ${HTMLDIR}
 
