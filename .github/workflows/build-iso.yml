@@ -1,30 +1,31 @@
-name: Build Void Linux LXDE ISO
+name: Build Custom LXDE ISO
 
 on:
-  push:
-    branches: [ main ]
   workflow_dispatch: 
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    steps:
-      - name: Install host dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y mtools xorriso squashfs-tools m4 qemu-user-static make git
+    # Usamos la imagen oficial de construcción de Void para que no falte ningún comando
+    container:
+      image: 'ghcr.io/void-linux/void-mklive:20250116R1'
+      options: --privileged
+      volumes:
+        - /dev:/dev
 
-      - name: Setup void-mklive
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install dependencies in container
         run: |
-          git clone https://github.com/void-linux/void-mklive.git
-          cd void-mklive
-          make
+          xbps-install -Syu xbps
+          xbps-install -yu
+          # mklive ya viene instalado en esta imagen
 
       - name: Build the ISO
         run: |
-          cd void-mklive
-          
-          # Base ISO oficial + LXDE + lxdm + b43 + wicd (incluye wicd-client)
+          # Lista de paquetes exacta que pediste
           PACKAGES="base-system void-repo-nonfree \
           linux-firmware-network b43-fwcutter \
           xorg-server xorg-video-drivers xorg-input-drivers \
@@ -33,13 +34,15 @@ jobs:
           pavucontrol alsa-utils alsa-plugins-pulseaudio \
           desktop-file-utils htop dbus \
           xmirror vpm fuzzypkg micro git"
-          
-          sudo ./mklive.sh \
+
+          # Ejecutamos mklive.sh (que ya está en el PATH del contenedor)
+          # Habilitamos dbus, wicd y lxdm
+          mklive.sh \
             -r https://repo-default.voidlinux.org/current \
             -r https://repo-default.voidlinux.org/current/nonfree \
             -p "$PACKAGES" \
             -S "dbus wicd lxdm" \
-            -o ../void-lxde-custom.iso
+            -o void-lxde-custom.iso
 
       - name: Upload ISO Artifact
         uses: actions/upload-artifact@v4
