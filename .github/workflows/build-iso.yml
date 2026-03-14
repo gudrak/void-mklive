@@ -3,28 +3,43 @@ name: Build Void Linux LXDE ISO
 on:
   push:
     branches: [ main ]
-  workflow_dispatch: # Permite ejecutarlo manualmente
+  workflow_dispatch: 
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Install dependencies
+      - name: Install host dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y mtools xorriso wget squashfs-tools m4
+          sudo apt-get install -y mtools xorriso squashfs-tools m4 qemu-user-static make git
+
+      - name: Setup void-mklive
+        run: |
+          git clone https://github.com/void-linux/void-mklive.git
+          cd void-mklive
+          make
 
       - name: Build the ISO
         run: |
-          # Definimos los paquetes que pediste
-          PACKAGES="base-system xorg-server xorg-video-drivers xorg-input-drivers lxdm lxde gvfs b43-fwcutter xmirror vpm fuzzypkg micro git"
+          cd void-mklive
           
-          # Ejecutamos el script de mklive
-          # Usamos sudo porque mklive necesita montar sistemas de archivos
-          sudo ./mklive.sh -p "$PACKAGES" -o void-lxde-custom.iso
+          # Base ISO oficial + LXDE + lxdm + b43 + wicd (incluye wicd-client)
+          PACKAGES="base-system void-repo-nonfree \
+          linux-firmware-network b43-fwcutter \
+          xorg-server xorg-video-drivers xorg-input-drivers \
+          lxdm lxde gvfs gvfs-mtp gvfs-smb \
+          wicd \
+          pavucontrol alsa-utils alsa-plugins-pulseaudio \
+          desktop-file-utils htop dbus \
+          xmirror vpm fuzzypkg micro git"
+          
+          sudo ./mklive.sh \
+            -r https://repo-default.voidlinux.org/current \
+            -r https://repo-default.voidlinux.org/current/nonfree \
+            -p "$PACKAGES" \
+            -S "dbus wicd lxdm" \
+            -o ../void-lxde-custom.iso
 
       - name: Upload ISO Artifact
         uses: actions/upload-artifact@v4
