@@ -1,0 +1,33 @@
+name: Build Void Linux LXDE ISO
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch: # Permite ejecutarlo manualmente
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y mtools xorriso wget squashfs-tools m4
+
+      - name: Build the ISO
+        run: |
+          # Definimos los paquetes que pediste
+          PACKAGES="base-system xorg-server xorg-video-drivers xorg-input-drivers lxdm lxde gvfs b43-fwcutter xmirror vpm fuzzypkg micro git"
+          
+          # Ejecutamos el script de mklive
+          # Usamos sudo porque mklive necesita montar sistemas de archivos
+          sudo ./mklive.sh -p "$PACKAGES" -o void-lxde-custom.iso
+
+      - name: Upload ISO Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Void-LXDE-Custom-ISO
+          path: void-lxde-custom.iso
